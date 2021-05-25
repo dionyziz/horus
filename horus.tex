@@ -1,0 +1,44 @@
+\newif\iftwocolumn
+\newif\ifonecolumn
+\newif\iflncs
+\newif\ifccs
+\newif\ifanonymous
+\newif\iftoday
+\ccstrue % pick one: LNCS or CCS (and `make clean`)
+% \lncstrue
+\anonymoustrue
+
+\ifccs
+  \twocolumntrue
+\fi
+\iflncs
+  \onecolumntrue
+\fi
+
+\iflncs
+\documentclass[11pt]{llncs}
+\fi
+\ifccs
+\documentclass[sigconf, anonymous]{acmart}
+\input{ccs-preamble}
+\fi
+
+\usepackage{preamble}
+
+\begin{document}
+\import{./}{frontpage.tex}
+
+\import{./}{body.tex}
+
+\iflncs
+\thispagestyle{plain}
+\fi
+
+\ifccs
+  \bibliographystyle{ACM-Reference-Format}
+\else
+  \bibliographystyle{abbrv}
+\fi
+\bibliography{biblio,crypto,pubs}
+
+\end{document}

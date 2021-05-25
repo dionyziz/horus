@@ -1,0 +1,185 @@
+\ProvidesPackage{preamble}
+
+\usepackage[english]{babel}
+
+\iflncs
+\usepackage{cite}
+\fi
+% \usepackage{algorithmic}
+\usepackage{graphicx}
+\usepackage{textcomp}
+
+\usepackage{amsmath}
+% \let\proof\relax
+% \let\endproof\relax
+\usepackage{amsfonts}
+\iflncs
+  \usepackage{amssymb}
+\fi
+\iftwocolumn
+	\usepackage{amsthm}
+\fi
+\PassOptionsToPackage{hyphens}{url}\usepackage{hyperref}
+% \usepackage{hyperref}
+\usepackage{mathtools}
+\usepackage{listings}
+\usepackage{import}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\usepackage{varwidth}
+\usepackage{enumitem}
+\usepackage{thmtools}
+\usepackage{thm-restate}
+
+\hyphenation{block-chain}
+\hyphenation{block-chains}
+\hyphenation{in-ter-led-ger}
+\hyphenation{pol-ka-dot}
+\hyphenation{ten-der-mint}
+\hyphenation{NI-Po-PoW}
+\hyphenation{NI-Po-PoWs}
+\hyphenation{Ethe-re-um}
+\hyphenation{de-cen-tral-ized}
+\hyphenation{de-cen-tral-ize}
+
+\iftwocolumn
+\g@addto@macro{\UrlBreaks}{\UrlOrds}
+\else
+% \usepackage{geometry}
+% \geometry{
+%     a4paper,         % or letterpaper
+%     textwidth=15cm,  % llncs has 12.2cm
+%     textheight=24cm, % llncs has 19.3cm
+%     heightrounded,   % integer number of lines
+%     hratio=1:1,      % horizontally centered
+%     vratio=2:3,      % not vertically centered
+% }
+\fi
+
+\DeclareMathOperator*{\argmax}{arg\,max}
+\DeclareMathOperator*{\argmin}{arg\,min}
+
+\long\def\blockcomment#1\endblockcomment{}
+\let\eps\epsilon
+\def\Let#1#2{\State $#1\gets#2$}
+\newcommand{\CommentLine}[1]{
+    \State \(\triangleright\) \textit{#1}
+}
+\newcommand{\e}{\varepsilon}
+\def\chain{\mathcal{C}}
+\def\M{\mathcal{M}}
+\def\D{\mathcal{D}}
+\def\Q{\mathcal{Q}}
+\newcommand{\vectorx}{\ensuremath{\mathbf x}}
+\def\defeq{\stackrel{\text{\tiny def}}{=}}
+\def\Let#1#2{\State $#1\gets#2$}
+\def\shrink{\mathop{\rm shrink}}
+\def\len{\mathop{\rm len}}
+\def\chain{\mathcal{C}}
+\let\rest\lceil
+\let\suffix\rceil
+\let\s\subseteq
+\def\T{\mathcal{T}}
+\def\S{\mathcal{S}}
+\def\E{\mathop{{}\mathbb{E}}}
+\def\N{\mathbb{N}}
+\def\nb{\textsc{nb}}
+\def\frc#1#2{{\textstyle\frac{#1}{#2}}}
+
+\def \ifempty#1{\def\temp{#1} \ifx\temp\empty }
+
+\algblockdefx[Contract]{Contract}{EndContract}
+[1]{\textbf{contract #1}}
+[0]{\textbf{end contract}}
+
+\algblockdefx[Payable]{Payable}{EndPayable}
+[2]{\textbf{payable function #1}\ifempty{#2}\else(#2)\fi}
+[0]{\textbf{end function}}
+
+\algblockdefx[Internal]{Internal}{EndInternal}
+[2]{\textbf{internal function #1}(#2)}
+[0]{\textbf{end function}}
+
+\newcommand{\Qed}{
+    \iftwocolumn
+    \else
+        \qed
+    \fi
+}
+
+% \algblockdefx[Operator]{Operator}{EndOperator}
+% [1]{\textbf{operator #1}}
+% [0]{\textbf{end operator}}
+
+\usepackage[]{xcolor}
+\usepackage{color}
+
+\newcommand{\anote}[1]{{\color{magenta}[Andrew:{#1}]}}
+\newcommand{\aknote}[1]{{\color{magenta}[Aggelos:{#1}]}}
+\newcommand{\dionyziz}[1]{{\color{magenta}[Dionysis: {#1}]}}
+\newcommand{\nikos}[1]{{\color{blue}[Nikos: {#1}]}}
+\newcommand{\ignore}[1]{}
+
+\newcommand{\upchain}{\negthickspace\uparrow}
+\newcommand{\downchain}{\negthickspace\downarrow\,}
+
+%code options with \lstlisting
+\lstset{frame=tb,
+  showstringspaces=false,
+  columns=flexible,
+  basicstyle=\ttfamily,
+  keywordstyle=\color{blue},
+  commentstyle=\color{dkgreen},
+  stringstyle=\color{mauve},
+  breaklines=true,
+  breakatwhitespace=true,
+  tabsize=3,
+  escapeinside={(*@}{@*)},
+  frame=n
+}
+\lstdefinestyle{numbers}{numbers=left, stepnumber=1, numberstyle=\tiny, numbersep=10pt}
+\let\origthelstnumber\thelstnumber
+\makeatletter
+\newcommand*\Suppressnumber{%
+  \lst@AddToHook{OnNewLine}{%
+    \let\thelstnumber\relax%
+     \advance\c@lstnumber-\@ne\relax%
+    }%
+}
+
+\newcommand*\Reactivatenumber{%
+  \lst@AddToHook{OnNewLine}{%
+   \let\thelstnumber\origthelstnumber%
+   \advance\c@lstnumber\@ne\relax}%
+}
+
+\renewcommand\subsubsection{\@startsection{subsubsection}{3}{\z@}%
+                      {-18\p@ \@plus -4\p@ \@minus -4\p@}%
+                      {0.5em \@plus 0.22em \@minus 0.1em}%
+                      {\normalfont\normalsize\bfseries\boldmath}}
+
+%eliminate section numbering from \subsection
+%\renewcommand{\thesubsection}{\arabic{subsection}}
+
+%page style set to plain
+%pagestyle{plain}
+
+\ifccs
+% \iftwocolumn
+%     \newtheorem{theorem}{Theorem}[section]
+%     \newtheorem{corollary}{Corollary}[theorem]
+%     \newtheorem{lemma}[theorem]{Lemma}
+%
+     \theoremstyle{remark}
+     \newtheorem*{remark}{Remark}
+
+     \newtheorem*{theorem*}{Theorem}
+%
+%     \theoremstyle{definition}
+%     \newtheorem{definition}{Definition}[section]
+% \fi
+\fi
+
+\import{./}{macros.tex}
+
+\pagestyle{plain}

@@ -1,0 +1,33 @@
+\begin{algorithm}[H]
+  \caption{\label{alg.otp} Hours of Horus: A short OTP wallet.}
+
+  \begin{algorithmic}[1]
+      \Contract{OTPWallet}
+        \Let{\textsf{BLOCK\_DELAY}}{2k}
+        \Let{\textsf{HOURLY\_LIMIT}}{1 \textsf{ ether}}
+        \Let{r}{\bot}
+        \Let{\textsf{spent}}{\emptyset}
+        \Let{\textsf{commitments}}{\emptyset}
+
+        \Function{\sf construct}{$\overline{r}$}
+          \Let{r}{\overline{r}}
+        \EndFunction
+        \Function{\sf commit}{$z, t$}
+          \State{require($t > \textsf{block.number} + \textsf{BLOCK\_DELAY}$)}
+          \Let{\textsf{commitments}[z][t]}{\true}
+        \EndFunction
+        \Function{\sf reveal}{$\textsf{OTP}, \textsf{salt}, \textsf{to}, \textsf{amount},
+                               \textsf{ciphertext}, w, t, \pi$}
+          \Let{h}{H(\left<\textsf{OTP}, \textsf{salt}, \textsf{to}, \textsf{amount}\right>)}
+          \State{require($\textsf{commitments}[z][t]$)}
+          \State{require($\textsf{amount} \leq \textsf{HOURLY\_LIMIT}$)}
+          \State{require($\lnot \textsf{spent}[t]$)}
+          \State{require($\textsf{MT.Ver}(\textsf{ciphertext}, t, r, \pi)$)}
+          \State{require($\textsf{WE.Dec(\textsf{ciphertext}, w)} = \textsf{OTP}$)}
+          \Let{\textsf{spent}[t]}{\true}
+          \State{\textsf{to.transfer}(\textsf{amount})}
+        \EndFunction
+      \EndContract
+  \vskip2pt
+  \end{algorithmic}
+\end{algorithm}

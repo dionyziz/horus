@@ -1,0 +1,25 @@
+\section{An OTP Wallet}
+
+- can limit daily amount
+- can be used as 2FA (OTP+key) or 1FA (without key, just OTP)
+- MUST be time-based OTP, not counter OTP in this case
+
+\begin{figure}[ht]
+    \caption{Each $\textsf{OTP}_t$ is timelocked with time $t$. All the timelock
+             ciphertexts $c_t$ are
+             then organized into a Merkle Tree whose root is $r$.}
+    \centering
+    \includegraphics[width=\columnwidth,keepaspectratio]{figures/timelock-merkle.pdf}
+    \label{fig.merkle-otp}
+\end{figure}
+
+\begin{figure*}[ht]
+    \caption{The sequence diagram of the OTP wallet. After initialization, the OTP device
+             becomes airgapped and the user submits the OTP visually to an online computer
+             at time $t$.}
+    \centering
+    \includegraphics[width=0.7 \textwidth,keepaspectratio]{figures/otp-sequence-diagram.pdf}
+    \label{fig.sequence-diagram}
+\end{figure*}
+
+\import{./}{algorithms/alg.otp.tex}
