@@ -1,0 +1,98 @@
+\section{Discussion}
+
+Having completed the presentation of our schemes, we now discuss a couple of
+shortcomings and advantages of our scheme that differentiate it from previously
+known solutions.
+
+\noindent
+\textbf{A bounty for the miners.}
+In our analysis, we have considered a rational adversary who is only allowed
+to allocate her capital into taking guesses for the user passwords and OTPs
+and holds a minority of the adversarial power. This worldview is
+slightly myopic. An adversary with a large capital operating in an open world
+can also use this money for other purposes such as bribing miners.
+In fact, let us
+take a step back and reconsider the
+\emph{honest majority} assumption of the chain which allowed us to conclude
+that the properties of common prefix, safety, and liveness hold. What if the
+miners are not honest, but rational, instead? In this case, the properties
+do not hold (it is known that the honest protocol is not a Nash
+equilibrium~\cite{selfish}, although it may be close to it~\cite{mining-games}).
+In our case of keyless wallets, the wallet functions as a \emph{bounty}
+to the miner who creates a long chain fork: If an
+adversary can violate the common prefix property, then she can, as far
+as the chain is concerned ``go back in time.'' In such an attack,
+after the secrets become timelock decryptable, the adversary creates a
+long chain reorganization and resubmits the correct guess to the wallet.
+As the reorganization was long, the delay check in the smart contract
+succeeds and the trial is correctly committed to the chain,
+granting the adversary the prize. This can be dangerous.
+
+However, It can be argued that such bounties can be created by the adversary
+herself: If she double spends her money, she creates an incentive
+for herself to go back in time and reclaim it. But there is
+a crucial difference: The adversary can only spend her own money in the double spending
+case. Namely, although in a double spending case, the party receiving the
+money was harmed by the chargeback, it is the adversary's money that is
+being double spent, not someone else's. There is another critical
+difference here: While a single adversary can create such bounties for
+herself, keyless wallets are \emph{universal} bounties claimable by any miner.
+We remark, however, that a double spending adversary
+can twist the double spending attack in a way that makes it a universal
+bounty: The adversary first
+creates a legitimate transaction spending some of her own money and
+receives, say, fiat money in exchange. She then creates a double spending
+transaction in an alternative fork: That double spending transaction
+pays $50\%$ of her money to herself, and the rest to the miner who
+confirms the given block. In this case, all miners are incentivized
+to confirm this transaction and fork.
+
+Therefore, we argue that the existing blockchain systems are not very
+different in the way incentives are aligned as compared to our proposed
+wallet. Nevertheless, as highlighted in the analysis, the proposed wallet
+does indeed have a different security model from a standard wallet: it
+is not purely cryptographic, but a cryptographic/cryptoeconomic hybrid.
+
+\noindent
+\textbf{Temporary dishonest majority.}
+Our analysis assumed adversarial minority
+throughout the execution. However, this may not necessarily be the case.
+Blockchains have faced situations where
+the adversarial power has temporary majority spikes,
+even though the adversary generally controls only a
+minority~\cite{temporary-dishonest,supremacy}.
+One of the arguments protecting from double spending stems from
+the ability of the user to set their own local $k$ parameter when they
+consider which transaction to accept as confirmed. The parameter $k$ is
+not a global parameter of the system, but it can be set by each user
+individually at the time of payment. If there are rumours or evidence
+that the chain may be under attack, the user can delay accepting payments.
+This is not the case for our protocol. While the user can set the critical
+$2k$ delay when instantiating the contract, and this is a local choice,
+this choice cannot be changed later. If an adversary attains majority
+after the contract has been instantiated, she will be able to roll
+back the chain sufficiently to steal the user's money. This limitation
+of the system must be taken into account when deciding about the $k$
+parameter of the wallet: The parameter must not only withstand current
+adversarial bounds, but adversarial bounds through the lifetime of the
+wallet. One mechanism to deal with this issue is to migrate from a
+wallet with a small $k$ to a different wallet with a more
+conservative value when evidence appears that the chain may become
+attacked in the near future. If the blockchain network cannot be
+trusted to maintain honest majority, and the adversarial majority spike
+length is unpredictable, the money cannot be left and forgotten
+as in a key-based wallet.
+
+\noindent
+\textbf{Detectability of brute force attacks.}
+One of the advantages of our system is that brute force attacks are
+not only economically infeasible, but they are also detectable. If an
+adversary submits a brute force attempt to the wallet, a \emph{commit}
+transaction will appear on the chain that the honest user will see.
+As such, the user can decide to move their funds out of their wallet
+if they observe such behavior. This benefit stems from the fact that
+the brute forcing of user passwords and OTPs cannot be done offline,
+but must necessarily be made on the chain. Our rate limiting scheme
+is therefore not just enabling limiting, but also detection. It is
+the first scheme of its kind that works in a decentralized manner
+on-chain.

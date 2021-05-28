@@ -1,1 +1,134 @@
 \section{Variable Difficulty Proof-of-Work}
+
+The proof-of-work OTP wallet just described is suitable for the
+\emph{static difficulty}
+model in which the mining target $T$ is not adjusted and remains constant.
+Real blockhchain systems adjust their $T$ parameter dynamically in every
+epoch, as discussed in the Preliminaries section.
+
+The construction for the dynamic difficulty proof-of-work model is similar
+to the static difficulty proof-of-work construction, with a key difference
+in the \textsc{NP} language used for witness encryption. The key idea is
+that, instead of encrypting for a chain descending from $B$ and consisting
+of $t$ \emph{blocks} in the future, we need to encrypt for a chain descending
+from $B$ and consisting of blocks that have together accumulated a total of $t$
+\emph{difficulty}. More concretely, the witness encryption problem statement
+$x = (B, t, T_0, r_0, \nu)$ contains $B$ and $t$ as before, but now also contains the
+term $T_0$, the difficulty of the chain at the point when timelock encryption
+took place, the round $r_0$ during which the first block of the current epoch was
+generated, as well as $\nu$, the position of block $B$ within its current epoch
+($\nu = (|C| - k) \bmod m$, where $m$ denotes the fixed epoch length).
+
+The format of the witness $w$ is now a sequence
+of block headers in the form
+$\left<T_i, \textsf{ctr}_i, \textsf{tx}_i, H(B_{i-1}), r_i\right>$,
+where $\textsf{ctr}_i$, $\textsf{tx}_i$ and $H(B_{i-1})$ are as before, and,
+additionally, $T_i$ is the individual block's mining target and $r_i$ is
+the round during which it was mined (following the notation of Garay
+et al.~\cite{varbackbone}). The relation $\mathcal{R}$ checks that
+the witness provided forms a chain that begins at the last known stable block $B$,
+that every block satisfies the dynamic difficulty proof-of-work equation
+$H(B_i) \leq T_i$, and that difficulty has been adjusted correctly.
+Specifically, for the difficulty adjustment, it checks that
+for all $i \geq 2$, if $i - \nu \bmod m \neq 1$, then $T_{i-1} = T_i$
+(ensuring difficulty was not improperly adjusted internally within the epoch of $B$ or any
+subsequent epochs).
+It also checks that the rounds
+provided are increasing $r_i < r_{i+1}$, and ensures that the difficulty
+at the epoch borders $i-1$, $i$ with $i - \nu \bmod m \neq 1$ and $i > 1$
+has been correctly adjusted by verifying that
+$T_{i} = \min(\max(T'_i, \frac{1}{\tau} T'_i), \tau T'_i)$,
+where $T'_i = \frac{r_{i-1} - r_{i-m}}{a} T_{i-1}$ is the unclamped
+target, and the term $a$ indicates the expected block production rate of the system in
+rounds~\cite{varbackbone}.
+To achieve security with overwhelming probability, and not just in expectation,
+in $\kappa$, it is imperative that the $\tau$ bounds are also checked by $\mathcal{R}$
+(see Bahack~\cite{bahack} for more details on a tail attack).
+Lastly, the relation checks that the difficulty is sufficient, as required
+by the $t$ parameter. To do this, the difficulty of each block in the witness
+is summed up to discover the cummulative difficulty of the fork, checking that
+$\sum_{\left<T_i, \_, \_, \_, \_\right> \in w} \frac{1}{T_i} \geq t$.
+
+Now that the precise \textsc{NP} language has been established, a
+couple of things need to be changed in our protocol. First of all, at the time
+the OTPs are generated, \textsf{MAX\_TIME} no longer indicates the maximum
+lifetime of the wallet (in chunks of \textsf{HOURLY\_BLOCK\_RATE} blocks),
+but the maximum total \emph{difficulty} accumulated
+during the lifetime of the wallet. So we rename it to \textsf{MAX\_DIFFICULTY}.
+This parameter is sensitive in case the difficulty
+\emph{increases}. Hence, the value must be \emph{increased} sufficiently
+(at the cost of increased IPFS storage needs)
+to cover for all foreseeable difficulty adjustments for the expected lifetime
+of the wallet. One way to do this is to look at past difficulty adjustment
+trends and extrapolate them to the future for the number of years the
+wallet is to be usable. In any case, this prediction does not need to be
+perfect: In the unfortunate case that the OTPs are close to becoming exhausted,
+which can easily be observed by inspecting the chain as it evolves,
+the wallet can be sunset by moving the funds to a new wallet with a new
+lifetime.
+
+Next, the value \textsf{HOURLY\_BLOCK\_RATE} no longer indicates the number of
+blocks generated in one hour, but the amount of difficulty that must be accumulated
+before the next OTP can be utilized. So we rename it to
+\textsf{OTP\_ROTATION\_DIFFICULTY}. This parameter is sensitive in case the difficulty
+\emph{decreases}. Hence, this value must be \emph{decreased} sufficiently
+(at the cost of increased IPFS storage needs) to allow the user to spend
+as quickly as desired. As difficulty typically does not decrease, one way
+to do this is to look at the previous \textsf{HOURLY\_BLOCK\_RATE} parameter
+and multiply it by the current difficulty to obtain a lower bound for the future.
+If one can predict a lower bound for how much future difficulty increases, it
+is also possible to timelock encrypt with non-uniform difficulty: The difference
+in the difficulty used to witness encrypt two early consecutive OTPs can be
+smaller than the difference in difficulty used to witness encrypt two later
+consecutive OTPs. The precise mechanism to do this effectively depends on the
+cryptocurrency and empirical measurements.
+
+Lastly, the smart contract must be modified in the security-crit\-i\-cal line that
+ensures that $t$ is sufficiently in the future. In the static difficulty, $t$
+counts the number of blocks (or slots in the proof-of-stake case), but here
+it is counting difficulty. Therefore, it cannot be compared to \textsf{block.number},
+and the $2k$ delay (which also counts blocks) cannot be readily applied.
+Instead, we must use a new variable\footnote{This block property is not currently available
+in Ethereum Solidity, but it is available in web3 as \texttt{block.totalDifficulty}.
+It is an easily implementable solution, but can even be incorporated into a smart
+contract within the current infrastructure without any forks~\cite{derivatives}.}
+\textsf{block.cumdiff},
+the cummulative difficulty collected by the blockchain
+if all the difficulty from genesis to the current block is summed up.
+Additionally, the $2k$ factor must be weighted by the current difficulty
+$\frac{1}{\textsf{block.T}}$, where $\textsf{block.T}$ indicates the
+mining target of the current block.
+
+The argument for the correctness of the scheme and the security of the scheme
+remains the same. Some remarks about the security portion are in order. First,
+recall that any blockchain protocol does not accept blocks with timestamps in
+the future. In the static difficulty model, this was not important, but in the
+proof-of-stake and in the variable difficulty model, it is something to consider.
+In particular, for the variable difficulty case, if the adversary constructs
+blocks timestamped with future rounds, she can cause the difficulty to drop
+more than it would be possible in a real-world execution. However, this does
+not bless the adversary with more mining power. Additionally, such chains will
+not be mined on by honest parties (because they are considered invalid, as of yet),
+and so they will only be extended by the adversary.
+The effect is the contrary
+of a difficulty raising~\cite{bahack} attack: The total difficulty accumulated
+as the target difficulty is artificially decreased becomes concentrated to its expected value.
+Hence, the minority adversary, who does not win in expectation, has an
+even lower probability of accumulating the difficulty goal described by $x$
+in this futuristic chain. Therefore, we shall not be concerned about this
+behavior.
+
+\noindent
+\textbf{The bounded delay model.} The above high-level analysis, as well as
+the more detailed analysis
+of the static case in Section~\ref{sec:analysis}, was in the synchronous setting. However, all the proofs
+made direct use of high-level chain properties such as the common prefix property,
+safety, and liveness. The use of the rounds $r_c$, $r_i$, and $r_z$ to split time
+into chunks in the proof of Lemmas~\ref{lem:rate-limit} and \ref{lem:rate-limit-otp} is
+material to the proof. However, these
+rounds are defined based on transaction broadcast events and lengths attained
+by local honest chains.
+In a setting where the parties incur an unknown bounded
+delay $\Delta$ (which satisfies certain conditions~\cite{backbone-new}), the
+properties of the chain still hold, albeit with worse parameters $k$ and $\ell$,
+and the same security proof remains valid.

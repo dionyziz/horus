@@ -38,7 +38,7 @@ Merkle tree root on the blockchain and outputs a wallet address to which money c
 be deposited at any time. The internal nodes of the Merkle tree are posted on a public
 high availability location such as IPFS~\cite{ipfs} and can also be kept by Alice
 in any untrusted device, if desired for availability. Alice then disconnects the mobile wallet and keeps it
-completely airgapped and offline. At any time, Alice can use the offline device to generate
+completely air gapped and offline. At any time, Alice can use the offline device to generate
 a time-based OTP. Without plugging in the offline device via USB or connecting it
 to the Internet, Alice visually copies the short (perhaps $6$ alphanumeric characters long)
 OTP that appears on the device's screen into her online computer. The wallet on
@@ -46,9 +46,9 @@ her online computer can then be used to input a target address and amount to be 
 Contrary to our previous construction, this second construction allows the user
 to spend money \emph{at any time} (for the price of maintaining
 the offline OTP device). As the OTPs are very short, this wallet is highly usable.
-After the initial OTP seed generation, the secrets are kept in an
-airgapped device, ensuring any bugs in the hardware or software cannot be abused
-to steal keys or secrets.
+After the initial OTP seed generation, the seed is kept in an
+air gapped device, ensuring any bugs in the hardware or software cannot be abused
+to steal it.
 
 Critical to the security of both constructions is ensuring that no adversary can
 brute force the short password or OTPs.
@@ -68,10 +68,10 @@ To achieve this property, we leverage the fact that the network is performing
 proof-of-work~\cite{pow} (or proof-of-stake~\cite{ouroboros}) in a predictable rate in expectation~\cite{bitcoin-sok}. We use \emph{Witness Encryption}
 (WE)~\cite{STOC:GGSW13} to encrypt
 the password in such a way that it can only be decrypted using the \emph{future}
-proof-of-work that will be performed by the network. As such, the encryption
+proof-of-work/stake that will be performed by the network. As such, the encryption
 is a \emph{Timelock Encryption}~\cite{timelock} in which the miners function in tandem~\cite{timelock-bitcoin} to
 decrypt the submitted password. This decryption is a by-product of
-the proof-of-work they are performing anyway. The miners do not need to know that the
+the proof-of-work/stake they are performing anyway. The miners do not need to know that the
 passwords have been timelock encrypted. The security of timelock encryption
 ensures that the passwords will not be decryptable prior to the chain progressing
 a certain number of blocks. Our security argument stands upon five pillars:
@@ -79,13 +79,13 @@ a certain number of blocks. Our security argument stands upon five pillars:
 \begin{enumerate}
       \item a secure \emph{extractable} Witness Encryption scheme,
       \item a secure underlying blockchain (with \emph{Common Prefix}),
-      \item a secure hash function (modelled as a \emph{Random Oracle}),
+      \item a \emph{preimage}/\emph{collision} resistant hash function;
       \item a secure \emph{pseudorandom} OTP scheme, and
-      \item a rational, or limited capital, adversary.
+      \item a rational adversary.
 \end{enumerate}
 
 Our constructions could, in principle, be deployed to any smart-contract--enabled
-proof-of-work chain such as Ethereum. In particular, we do not require any modifications
+proof-of-work/stake chain such as Ethereum. In particular, we do not require any modifications
 to the Ethereum consensus mechanism or smart contract virtual machine. The
 best known instantiation of the Witness Encryption primitive, which the Timelock Encryption
 instance makes use of, requires the use of \emph{multilinear maps}.
@@ -102,12 +102,21 @@ The contributions of this paper are summarized as follows:
         just using a short password at a prespecified \emph{maturity date}.
   \item We introduce the first timelock-based high usability \emph{OTP} wallet, with OTP length of
         just 6 alphanumeric characters. The funds can be spent at any time just by
-        providing the OTP password from an airgapped device.
+        providing the OTP password from an air gapped device.
   \item In the process of building these wallets, we put forth the first
         \emph{decentralized rate limiting} scheme. The scheme protects the user
         from brute force attacks by an adversary, by requiring all attempts to
         be recorded on the chain.
 \end{itemize}
+
+Secondary contributions include the first instantiation of timelock encryption applied
+to proof-of-stake blockchains and variable difficulty proof-of-work blockchains. Lastly,
+our security argument uses a hybrid approach which combines a high-entropy
+cryptographic parameter ---in which classical cryptographic security is ensured with overwhelming
+probability--- with a low-entropy cryptoeconomic parameter whose role is to ensure the
+attack is uneconomical for a rational adversary. This novel proof methodology may be of
+independent interest in analyzing blockchain protocols, which often compose cryptography
+and economics.
 
 \noindent
 \textbf{Related work.}
@@ -136,6 +145,6 @@ The security of offline wallets is explored by Karakostas et al.~\cite{hardware-
 The use of OTP~\cite{rfc6238,rfc4226} as a mechanism for cryptocurrency wallet protection has been explored in SmartOTP~\cite{smartotp}.
 The SmartOTP work was a great inspiration for the present paper. Contrary to our construction, their
 wallet uses OTPs as a second factor (in addition to private keys) and requires large-length OTP strings
-which makes it less usable, but their implementation is quite practical and even has a Solidity implementation.
+which make it less usable, but their implementation is quite practical and even has a Solidity implementation.
 Password-based cryptocurrency wallets have previously appeared as \emph{brain wallets},
 but brute force attacks against them have proven catastrophic~\cite{brain-drain}.

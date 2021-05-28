@@ -1,1 +1,72 @@
 \section{Proof-of-Stake}
+
+We now adapt our OTP wallet construction to the proof-of-stake setting (the password wallet can also
+be adapted likewise). For concreteness, we describe
+a construction for the \emph{Ouroboros}~\cite{ouroboros} and \emph{Ouroboros Praos}~\cite{praos}
+systems, but our results are extensible to other systems as well (such as Snow
+White~\cite{DBLP:journals/iacr/BentovPS16a} and Algorand~\cite{algorand}).
+
+The construction does not change much from the proof-of-work case, so we only provide a sketch
+of the construction here. The smart contract remains identical, except
+for the moderately hard \textsc{NP} language describing the existence of a proof-of-work witness.
+More concretely, the problem instance $x$ is now $(\rho, sl, D, t)$, where $\rho$ denotes the randomness
+of the current epoch, $sl$ denotes the
+slot during which block $B$ (the most recently known stable block $\chain[-k]$) was generated,
+$D$ denotes the stake distribution during the current epoch, and $t$ denotes
+the future time.
+While the proof-of-stake chains also enjoy the common prefix property,
+unfortunately, we cannot simply take any blockchain that has length $t$ following $B$,
+because the adversary can create blockchains of arbitrary length. The proof-of-stake system
+ensures that such chains are not taken into account by checking that any blockchain
+received on the network does not contain blocks that were issued in future slots~\cite{ouroboros}.
+However, we cannot incorporate this check in the form of an \textsc{NP} language, as
+we do not have access to a clock.
+
+Instead, we rely on a critical property of the proof-of-stake system that states that,
+in any consecutive $2k$ slots, at least $k+1$ will be honestly allocated.
+Therefore, we reinterpret the parameter $t$ to mean the \emph{number of slots} after
+block $B$ instead of the \emph{number of blocks}. The witness $w$ consists
+of two parts: \emph{Block} data and \emph{epoch} data.
+The block data contains a sequence
+$(\sigma_1, H_1, \pi_1, sl_1),\allowbreak (\sigma_2, H_2, \pi_2, sl_2),\allowbreak
+ \cdots,\allowbreak (\sigma_d, H_d, \pi_d, sl_d)$
+of signatures
+$\sigma_i$ each with their corresponding slot $sl_i$, with $sl_i > sl$ and
+a proof of leadership $\pi_i$. As in the proof-of-work case, no transaction data is verified.
+The epoch data contains a sequence
+$(\rho_1, u_1),\allowbreak (\rho_2, u_2),\allowbreak \cdots,\allowbreak (\rho_e, u_e)$
+spanning all the epochs starting from the epoch of slot $sl$ up until the epoch
+of slot $sl + t$. For each of these, the randomness $\rho_j$ and evicence $u_j$ of the multiparty
+computation leading to it (typically a collection of signatures) is included.
+
+The relation $\mathcal{R}$ polynomially verifies that all the signatures $\sigma_i$
+correctly sign their respective plaintext $H_i$, that
+the proofs of leadership $\pi_i$ are correct, and that the evidence $u_j$ for the
+randomness $\rho_j$ of each epoch is correct.
+Critically, it also checks that, for every window of length $2k$ slots, at least
+$k+1$ blocks have been provided.
+
+This completes the basic scheme. We can improve upon this scheme by noting
+that blocks and signatures for everything but the most recent epoch
+are not necessary, as long as the randomness and its evidence for each epoch is
+given. This evidence can be made quite short using ATMs schemes, in which the
+evidence consists of aggregate threshold signatures
+(c.f., ~\cite{pos-sidechains}). In such an optimization, a constant amount of bits
+is required per epoch. Blocks only need to be presented for the last
+epoch in order to have better time granularity. However, here, too, some pruning can
+occur: It is sufficient that only $k+1$
+blocks and signatures pertaining to the most recent $2k$ slots of the most recent epoch
+are presented.
+The relation $\mathcal{R}$ can then simply check the evidence for each epoch randomness,
+that the $k+1$ signatures are correct, that they all fall within a $2k$ window, and
+that the slot during which the last such block was generated is $t$.
+Again, the witness encryption can be composed with a zk-SNARK
+to make the witnesses constant size.
+
+Contrary to proof-of-work where the velocity of the chain is unknown, despite bounded,
+in the proof-of-stake case we have a much better grasp on how quickly the time $t$
+will be reached, as it is a slot number. While the adversary still enjoys some early
+leakage ($k$ slots early), the timelocked data will be available at the prespecified time.
+In the proof-of-work case, it is possible that the blockchain growth rate will
+increase or decrease due to the stochastic nature of block production. As such, the
+proof-of-stake scheme is naturally fitting to the timelock problem.

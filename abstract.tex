@@ -5,13 +5,13 @@ keys are required.
 It requires a smart contract blockchain.
 We propose two schemes. In the first, the user sets a short wallet password
 and can spend their money at a prespecified maturity date using the
-password alone.
-In the second scheme, the user uses an OTP authenticator seed to initially
+password alone. Using this as a stepping stone, we propose
+a second scheme, in which the user uses an OTP authenticator seed to
 generate a long series of time-based OTP passwords for the foreseeable
-future.  These are organized in a Merkle tree whose root is stored in a
+future.  These are encrypted and organized in a Merkle tree whose root is stored in a
 smart contract.
 The user can spend funds at any time by simply visually providing
-the current OTP password from an airgapped device.
+the current OTP password from an air gapped device.
 These OTPs can be relatively short:
 Just $6$ alphanumeric characters suffice.
 Our OTP scheme can work in proof-of-stake as well as
@@ -19,7 +19,7 @@ static and variable difficulty proof-of-work blockchains.
 The low-entropy in the passwords and OTPs in our scheme is protected
 from brute force attempts by requiring that an adversary accompany
 any brute force attempt by a transaction on the chain. This quickly
-incurs enormous gas costs for the adversary. Thus, we develop the first decentralized
+incurs enormous economic costs for the adversary. Thus, we develop the first decentralized
 \emph{rate limiting} scheme.
 We use
 \emph{Witness Encryption} (WE) to construct a timelock encryption scheme

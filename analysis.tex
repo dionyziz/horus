@@ -1,0 +1,233 @@
+\section{Analysis}\label{sec:analysis}
+
+We now give a more complete analysis of the scheme. First, let us prove that the Password-based
+wallet of Algorithm~\ref{alg.password} is correct.
+
+\begin{theorem}[Password Wallet Correctness (Informal)]
+  Let the blockchain have \emph{liveness} and \emph{safety},
+  and let the witness encryption scheme $\textsf{WE}$ be \emph{correct}.
+  An honest party spending at block height $t_1 - \ell - 2k$ or earlier
+  will generate a valid spending transaction
+  for Algorithm~\ref{alg.password}.
+\end{theorem}
+\begin{proof}[Sketch]
+  The contract is created when $B = \chain[-k]$ is stable. Due to safety, all the future chains
+  will be extending this block. The contract is initialized with $x = (B, t)$ by issuing the
+  $\textsf{tx}_\textsf{construct}$ transaction. Due to liveness, this transaction is confirmed
+  within $\ell$ blocks.
+  The honest user then creates a transaction $\textsf{tx}_\textsf{commit}$ when her
+  own chain has length $|\chain| = t_1 - \ell - 2k$.
+  Due to liveness, this transaction becomes confirmed for all honest parties after $\ell$ blocks
+  have elapsed, and is placed in position $\chain[t_1 - 2k]$ or earlier. Therefore, Line~\ref{alg.password.delay}
+  of the method \emph{commit} succeeds. When $|\chain| = t_1$, the honest user calls
+  \emph{reveal}, passing $w$. Due to the correctness of the witness encryption scheme,
+  the decryption succeeds. The password and salt revealed match the ones committed.
+  Due to liveness, this transaction becomes confirmed.
+\end{proof}
+
+The correctness of the OTP-based scheme is similar.
+
+\begin{theorem}[OTP Wallet Correctness (Informal)]
+  Let the blockchain have \emph{liveness} and \emph{safety},
+  and let the witness encryption scheme $\textsf{WE}$ be \emph{correct}.
+  An honest party spending multiple times prior to $\textsf{MAX\_TIME} - \ell - 2k$
+  will succeed in creating valid transactions.
+  in Algorithm~\ref{alg.otp}.
+\end{theorem}
+\begin{proof}[Sketch]
+  The proof is the same as above, with the difference that the value $t$ is provided
+  at the \textsf{commit} time, not the \textsf{construct} time. The argument that
+  Line~\ref{alg.otp.delay} will be successful remains the same due to liveness.
+\end{proof}
+
+Our security analysis is in a hybrid \emph{cryptographic} and \emph{cryptoeconomic}
+setting.
+In the system described, we have two security parameters. First, we have
+the \emph{cryptographic} security
+parameter $\kappa$ ($\approx 128$ bits), which determines the security of the hash function,
+the security of the witness encryption scheme, and the security of the blockchain (in terms
+of liveness, safety, and common prefix). The probability of failure is negligible in this
+parameter. Any breakage in this parameter can be catastrophic for the system and
+can potentially provide the adversary with gains without any cost.
+Secondly, we have the much shorter \emph{cryptoeconomic} security parameter $\lambda$
+($\approx 35$ bits) which denotes the entropy of the chosen user password $sk$ or the
+length of each OTP $\textsf{OTP}_t$.
+While this parameter is hopelessly short from a cryptographic
+point of view (and $2^{-35}$ is nothing but negligible), we will use it to establish
+a lower bound in the economic cost of an attack. In particular, we will tweak this
+parameter so that the return-on-investment of an attack can be made arbitrarily close
+to $-100\%$. The result will be that the adversary can make the probability of
+success non-negligible, but at an economic cost which renders such attempts irrational.
+
+We begin by stating our Decentralized Rate Limiting lemma, which establishes that
+an adversary must necessarily submit transactions to the blockchain in order to
+have any non-negligible probability of success. The probability of success is
+determined by the number of transactions submitted by the adversary and made
+persistent by the system. Based on this result, we will determine the cryptoeconomic
+parametrization ($\lambda$) required to make the system economically infeasible to attack.
+
+\begin{lemma}[Decentralized Rate Limiting (Informal)]\label{lem:rate-limit}
+  Consider a static difficulty proof-of-work
+  blockchain with \emph{safety} and \emph{common prefix}.
+  Let the hash function $H$ be collision-resistant and preimage-resistant, and let
+  the witness encryption scheme $\textsf{WE}$ be a \emph{secure witness encryption with witness extractability}.
+  A PPT adversary who submits fewer than $g$ transactions that are
+  eventually confirmed by all honest parties has a probability of
+  achieving a valid spending transaction in Algorithm~\ref{alg.password}
+  upper bounded by $\frac{g}{2^\lambda} + \textsf{negl}(\kappa)$.
+\end{lemma}
+\begin{proof}[Sketch]
+  In order for the adversary to have a valid transaction, she must have created
+  a $\textsf{tx}_\textsf{reveal}$ in which she passes a password $sk$, a \textsf{salt} and
+  a $\alpha'_{\textsf{to}}$ address which is different from the honestly provided $\alpha_{\textsf{to}}$ address.
+  This \textsf{reveal} transaction must be confirmed into the chain $\chain$ adopted by a verifier honest
+  party $P_v$ and have matching data with a previous $\textsf{tx}_\textsf{commit}'$ transaction which
+  was placed earlier in $\chain$. Additionally, $\textsf{tx}_\textsf{commit}'$ must be in $\chain[t_1 - 2k]$
+  or earlier (due to the check in Line~\ref{alg.password.delay}).
+  Due to the collision resistance of $H$, the respective commit transaction must be different
+  from the one ($\textsf{tx}_\textsf{commit}$) provided by the honest party, as
+  $\alpha_{\textsf{to}} \neq \alpha'_{\textsf{to}}$.
+
+  Let $r_c$ denote the round during which the spender honest party $P_s$ broadcasts
+  their $\textsf{tx}_\textsf{commit}$ transaction to the network, and let $r_z$
+  denote the last round during which \emph{all} honest parties have chains with length
+  of at most $t_1 - k$.
+
+  Let us consider all adversarially generated commit transactions $\textsf{tx}^i_\textsf{commit}$ ($i \geq 1$)
+  that are eventually reported as \emph{stable} by $P_v$
+  (the adversary can also create transactions that do not make it in the chain of $P_v$,
+  but we will not count these). For these transactions, let us consider the round $r_i$ during which
+  each of these transactions $\textsf{tx}^i_\textsf{commit}$ was created.
+
+  \textbf{Case 1:} $r_i < r_c$.
+  Since the honest spender has not yet submitted a commitment,
+  the only information that the adversary has is the ciphertext $c$. If at this round the
+  adversary can distinguish between $sk$ and any other plaintext in $\{0, 1\}^\lambda$
+  with probability non-negligible in $\kappa$, then, due to the witness extractability of
+  \textsf{WE}, an extractor can extract a witness $w$ attesting to the existence of a chain
+  of height $t_1$. But in that case, we can perform a computational reduction to an
+  adversary that breaks the common prefix property of the chain by producing a chain of
+  height $t_1$ at round $r_i$ when the honest party $P_v$ has adopted a chain of length
+  only $t_1 - \ell - 2k$. This breaks the common prefix assumption.
+
+  \textbf{Case 2:} $r_c \leq r_i \leq r_z$.
+  In this case, the honest spender has broadcast a commitment to the network, but there
+  are no chains of length $t_1$. The adversary now holds both the timelocked ciphertext $c$
+  and the commitment $z$. Again the adversary should not be able to distinguish between $sk$
+  and any other plaintext in $\{0, 1\}^\lambda$, except with probability negligible in
+  $\kappa$ (recall that the $\textsf{salt}$ is kept secret and has $\kappa$ bits of entropy).
+  Otherwise, we can either perform a reduction to a common-prefix-breaking adversary
+  making use of witness extractability, or we can perform a reduction to a
+  preimage-resistance-breaking adversary.
+
+  \textbf{Case 3:} $r_i > r_z$.
+  By the definition of $r_z$, in round $r_i$ there must exist an honest party
+  with a chain of length at least $t_1 - k$. By the common prefix property, all
+  other honest parties have a chain of length exceeding $t_1 - 2k$.
+
+  Let us consider what happens in all of these three cases. In the first two cases, any
+  \emph{single} guess that the adversary places into a transaction can be correct with
+  probability $\frac{1}{2^\lambda} + \textsf{negl}(\kappa)$. In the third
+  case, while the adversary can potentially guess with better probability (due to the chain
+  reaching its leakage point $t_1 - k$), any such transactions can never make it into
+  the chain eventually adopted by $P_v$, as the check in Line~\ref{alg.password.delay}
+  will fail.
+
+  As the transactions that eventually make it into the chain of $P_v$ were all generated prior
+  to $r_z$, the probability that each of them is a valid spending transaction is
+  upper bounded by $\frac{1}{2^\lambda} + \textsf{negl}(\kappa)$.
+  If the adversary submits at most $g$
+  such transactions, and applying a union bound, the overall probability of success
+  is $g(\frac{1}{2^\lambda} + \textsf{negl}(\kappa)) = \frac{g}{2^\lambda} + \textsf{negl}(\kappa)$.
+\end{proof}
+
+The above Lemma is identical for our other construction. We state it for completeness.
+
+\begin{lemma}[OTP Decentralized Rate Limiting (Informal)]\label{lem:rate-limit-otp}
+  Consider a static difficulty proof-of-work
+  blockchain with \emph{safety} and \emph{common prefix}.
+  Let the hash function $H$ be collision-resistant and preimage-resistant, and let
+  the witness encryption scheme $\textsf{WE}$ be a \emph{secure witness encryption with witness extractability}.
+  Let $\mathcal{G}$ be a secure pseudorandom function
+  $\{0, 1\}^\kappa \times \mathbb{N} \longrightarrow \{0, 1\}^\lambda$.
+  A PPT adversary who submits fewer than $g$ transactions that are
+  eventually confirmed by all honest parties has a probability of
+  achieving a valid spending transaction in Algorithm~\ref{alg.otp}
+  upper bounded by $\frac{g}{2^\lambda} + \textsf{negl}(\kappa)$.
+\end{lemma}
+\begin{proof}[Sketch]
+  The proof here is identical to Lemma~\ref{lem:rate-limit},
+  noting that each of the different $\textsf{OTP}_t$
+  essentially gives rise to independent attack paths to the adversary.
+  Due to the pseudorandom nature of the OTP scheme, any previous OTPs
+  do not reveal any information to our polynomial adversary.
+  An adversary making a spending attempt has
+  a probability of $\frac{1}{2^\lambda}$ of succeeding in each attempt,
+  unless it can be reduced to a collision-resistance-breaking adversary,
+  a common-prefix-breaking adversary, or an adversary breaking the
+  pseudorandomness of the OTP scheme. But all of these events are negligible
+  in $\kappa$.
+\end{proof}
+
+At this point, we have established that the probability of success is negligible
+in both parameters $\kappa$ and $\lambda$. However, we will keep the parameter $\lambda$
+short, and we will make the $\kappa$ parameter reasonably long ($\kappa = 128$).
+Setting $\lambda = \kappa$ would, of course, give sufficient security. The reason
+for separating these two parameters is that the $\lambda$ parameter affects the usability
+of the system: It is the number of characters that must be remembered by the user
+in the case of a password, or the number of characters that must be visually copied
+by the user in the case of an OTP.
+
+In the above result, we have expressed the probability as a sum of two terms:
+$\frac{g}{1^\lambda} + \textsf{negl}(\kappa)$. This reflects the nature of the
+two parameters: We opt to calculate the \emph{concrete} probability with respect
+to $\lambda$, but only give an asymptotic probability with respect to $\kappa$.
+This treatment hints at our intentions: Our high-level argument was to condition
+the system to the overwhelming events that there will be no cryptographic breakage
+in the hash function, common prefix property, blockchain safety, blockchain liveness,
+and OTP pseudorandomness. Conditioned under these events, the concrete probability as
+a function of $\lambda$
+allows us to make an argument of why any attack is uneconomical. This
+gives rise to our (cryptoeconomic) security theorem.
+
+\begin{theorem}[Cryptoeconomic Security (Informal)]\label{thm:security}
+  Consider a chain with fee $f$ per transaction. If the wallet of
+  Algorithm~\ref{alg.password} or Algorithm~\ref{alg.otp} is used with a maximum capital of $V$,
+  then the parametrization $\lambda > \log \frac{V}{f}$
+  yields a
+  negative expectation of income for the adversary, with overwhelming probability in $\kappa$.
+  Additionally,
+  the expected return-on-investment for this adversary is at most
+  $\frac{V}{f 1^\lambda} - 1$.
+\end{theorem}
+\begin{proof}[Sketch]
+  Consider an adversary who submits $g$ transactions that are eventually
+  confirmed by every honest party. This adversary is irrevocably investing a
+  capital of $gf$ for this attack. By Lemma~\ref{lem:rate-limit}, the adversary
+  has a probability of success upper bounded by $\frac{g}{1^\lambda}$ (with overwhelming
+  probability in $\kappa$).
+  The expected income for this adversary is at most
+  $\Ex[\textsf{income}] \leq V \frac{g}{1^\lambda} - gf$.
+  Taking $\lambda > \log \frac{V}{f}$, we obtain
+  $\Ex[\textsf{income}] < 0$. The expected return-on-investment is
+  $\frac{\Ex[\textsf{income}]}{gf} - 1$.
+\end{proof}
+
+In this scheme, we can set $\lambda$ big enough to make the return-on-investment as close to $-100\%$ as we want.
+If we want the return-on-investment to be $-1 + \epsilon$ for some $\epsilon \in (0, 1]$, we let
+$\lambda = \log \frac{V}{f \epsilon}$. In short, we can make the adversary lose an amount arbitrarily close to all their money
+in expectation.
+
+To consider some concrete parametrization of the scheme, let us assume that we wish to establish a
+target $-90\%$ ($\epsilon = 0.1$) expected return-on-investment for the adversary in a wallet where we want to store up to
+$V = \$100{,}000$ in capital at any point in time. Consider a blockchain where the fees per transaction
+are\footnote{This price corresponds to Ethereum--fiat prices and gas fees for
+simple transfer transactions in May 2021. As smart contract transactions are significantly
+more expensive, this is a conservative estimation for the fees.} at least $f = \$1.60$. We obtain
+$\lambda = \log \frac{V}{f \epsilon} = \log_2 625{,}000 < 20$ bits. This corresponds to just $6$
+numerical characters (base $10$), or just $4$ alphanumeric characters (base $58$).
+A standard OTP authenticator such as Google's Authenticator application is therefore
+appropriate for such parameters.
+Increasing
+the maximum capital that will be stored in the wallet by three orders of magnitude to
+$\$100{,}000{,}000$ requires $5$ alphanumeric characters instead.

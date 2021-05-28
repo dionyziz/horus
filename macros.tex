@@ -23,5 +23,10 @@
 {\algorithmicon\ #1\ \algorithmicdo}
 {\algorithmicend\ \algorithmicon}
 
+\algnewcommand\waitcommand{\textbf{wait until }}
+\def\Wait#1{\State\waitcommand #1}
+
 \def\chain{\mathcal{C}}
 \DeclareMathOperator{\Ex}{\mathbb{E}}
+
+\newcommand{\getsrandomly}{\overset{\$}{\gets}}

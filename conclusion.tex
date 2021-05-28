@@ -1,0 +1,30 @@
+\section{Conclusion}
+
+We have presented the first wallets that work securely without any private
+keys. We developed a password-based wallet with severe limitations: It could
+only be used once and at a predetermined maturity date. We then improved upon
+our first scheme by proposing an OTP wallet in which the user can provide an
+OTP from an air gapped device. We analyzed our scheme and proved it secure
+through a hybrid cryptographic/cryptoeconomic argument which may be of
+independent interest. The cryptoeconomic parametrization allowed us to
+set the OTP code to be quite short: Just $6$ alphanumeric characters sufficed
+even for large capital of seven figures and with a very conservative economic
+margin of $90\%$ capital loss for the adversary in expectation. Our calculations
+were also conservative with respect to current fees.
+
+We finally extended our scheme to work in the proof-of-stake model, as well
+as the variable difficulty proof-of-work model. While timelock encryption
+using blockchain witnesses leveraging witness encryption has been described
+before, we are the first to extend it to proof-of-stake and to effectively
+use it for the variable proof-of-work case as well (previous
+considerations~\cite{timelock-bitcoin} considered the variable difficulty
+case, but did not account for the fact that the decryption time will be
+varying with the miner population adjustments).
+
+As far as we know, our work is the first to build any useful protocol,
+and certainly to construct wallets, on top of timelock encryption and
+blockchains. We believe that timelock encryption and witness encryption
+is a promising cryptographic direction and, once established, will prove
+to be cornerstones of future protocol development for blockchains (and
+elsewhere). However, it remains to be seen whether a secure instantiation of
+these primitives will ever become practical.

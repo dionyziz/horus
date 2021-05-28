@@ -1,3 +1,5 @@
+\section{Auxiliary Theorems}
+
 The following theorem establishes that chains cannot grow too quickly. It uses the
 notation adopted from the backbone series~\cite{backbone,varbackbone}.
 
@@ -21,3 +23,13 @@ chain that exists on the network. The chain cannot grow too quickly:
   which has expectation $(r_1 - r_0)nq \frac{T}{2^\kappa}$. Applying a Chernoff bound with error $\epsilon$,
   we obtain the desired result.
 \end{proof}
+
+We include the Chernoff bound, referenced at a high level throughout this paper, for completeness.
+
+\begin{theorem}[Chernoff bounds]
+  Let $\{X_i:i\in[n]\}$ are mutually independent Boolean random variables,
+  with $\Pr[X_i=1]=p$, for all $i\in[n]$. Let $X=\sum_{i=1}^nX_i$ and $\mu=pn$.
+  Then, for any $\delta\in(0,1]$,
+  \[\Pr[X\le(1-\delta)\mu]\le e^{-\delta^2\mu/2}\hbox{~and~}
+    \Pr[X\ge(1+\delta)\mu]\le e^{-\delta^2\mu/3}.\]
+\end{theorem}
