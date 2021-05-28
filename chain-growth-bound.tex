@@ -3,7 +3,7 @@
 The following theorem establishes that chains cannot grow too quickly. It uses the
 notation adopted from the backbone series~\cite{backbone,varbackbone}.
 
-\begin{theorem*}[Chain Growth Bound]
+\begin{theorem}[Chain Growth Bound]
   In a typical execution,
 consider a round $r_0$ during which the longest chain that exists on the network has
 a height of $h_0$. Then at round $r_1 > r_0$, let $h_1$ denote the height of the longest
@@ -12,7 +12,7 @@ chain that exists on the network. The chain cannot grow too quickly:
 \[
   \Pr[h_1 - h_0 > (1 + \epsilon) (r_1 - r_0)nq \frac{T}{2^\kappa}] \leq \exp(-\Omega(\kappa (r_1 - r_0)))
 \]
-\end{theorem*}
+\end{theorem}
 \begin{proof}
   Let us consider the case where the adversary uses all her queries (if the adversary does not use
   all of her queries, we can force her to do so at the end of her round and ignore the results).

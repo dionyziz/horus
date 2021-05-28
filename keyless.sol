@@ -31,14 +31,14 @@ contract ShortPasswordWallet {
     ciphertext = _ciphertext;
     expires_at = _expires_at;
   }
-  function commit(bytes32 h) public {
+  function commit(bytes32 z) public {
     require(block.number < expires_at - BLOCK_DELAY);
-    commitments[h] = true;
+    commitments[z] = true;
   }
   function reveal(bytes memory witness, bytes memory password, bytes32 salt, address payable to) public {
-    bytes32 h = keccak256(abi.encodePacked(password, salt, to));
+    bytes32 z = keccak256(abi.encodePacked(password, salt, to));
 
-    require(commitments[h]);
+    require(commitments[z]);
     require(WitnessEncryption.decrypt(ciphertext, witness).equal(password));
 
     to.transfer(address(this).balance);
