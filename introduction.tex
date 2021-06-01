@@ -94,7 +94,6 @@ instance makes use of, requires the use of \emph{multilinear maps}.
 Multilinear maps are (approximately) constructible using ideal lattices.
 Unfortunately, this construction currently remains impractical.
 Until such constructions are built, our scheme is of theoretical interest.
-Depending on the witness encryption instantiation, our scheme can be quantum-resistant.
 
 \noindent
 \textbf{Our contributions.}
@@ -120,6 +119,11 @@ probability--- with a low-entropy cryptoeconomic parameter whose role is to ensu
 attack is uneconomical for a rational adversary. This novel proof methodology may be of
 independent interest in analyzing blockchain protocols, which often compose cryptography
 and economics.
+
+Our security assumptions pertain to pseudorandomness, hash security, and lattice-based cryptography.
+Therefore our wallets are also quantum-resistant for the case of proof-of-work instantiation. For the
+case of proof-of-stake, if the underlying blockchain is quantum-resistant (by leveraging quantum-resistant
+signature schemes and VRFs), then so are our wallets.
 
 \noindent
 \textbf{Related work.}
