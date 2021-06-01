@@ -167,6 +167,11 @@ certain time bounds in our construction.
 Note here that no validity is ensured in $\textsf{tx}_i$, but the common prefix property of blockchains
 makes this unnecessary.
 
+Our security proof will hinge on the fact that the blockchain has the \emph{common prefix} property: If
+an adversary can decrypt the witness encrypted ciphertext \emph{much} earlier than the honest parties,
+then she will need to have produced a chain which significantly deviates from the honest parties' chain,
+but this is improbable.
+
 The witnesses to these problem instances can grow linearly together with the blockchain. To reduce witness
 size, a (zero knowledge) proof of knowledge such as a zk-SNARK~\cite{EPRINT:BCTV13} can be used.
 In this case, instead of
