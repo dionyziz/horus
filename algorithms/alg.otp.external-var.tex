@@ -1,12 +1,9 @@
 \begin{algorithm}[H]
-  \caption{\label{alg.otp.external-var} Interacting with the Hours of Horus wallet in the variable difficulty case.}
+  \caption{\label{alg.otp.external-var} Interacting with variable difficulty Hours of Horus.}
 
   \begin{algorithmic}[1]
     \Let{\textsf{BLOCK\_DELAY}}{2k}
-    \Let{\textsf{seed}}{\bot}\Comment{After generation, remains air gapped}
-    \Let{pk}{\bot}\Comment{Published so that money can be received}
-    \Let{c}{[\,]}\Comment{Published on insecure public storage (e.g., IPFS)}
-    \Let{B}{\bot}\Comment{Published on insecure public storage}
+    \State{$\textsf{seed} \gets \bot$; $pk \gets \bot$; $c \gets [\,]$; $B \gets \bot$}
 
     \On{\sf initialize}
       \State{$\textsf{seed} \gets \{0, 1\}^\kappa$}\Comment{Seed is generated with high entropy $\kappa$}
@@ -14,8 +11,7 @@
       \For{$t \gets 1 \text{ to } \textsf{MAX\_DIFFICULTY}$}
         \Let{\textsf{OTP}_t}{\mathcal{G}(\textsf{seed}, t)}\Comment{Time $t$ OTP with low entropy $\lambda$}
         \Let{x}{(B, \textsf{OTP\_ROTATION\_DIFFICULTY} \cdot t)}
-        \Let{c_t}{\textsf{WE.Enc}(\textsf{OTP}_t, x)}
-        \Let{c}{c \concat c_t}
+        \Let{c}{c \concat \textsf{WE.Enc}(\textsf{OTP}_t, x)}
       \EndFor
       \Let{r}{\textsf{MT.build}(c)}
       \Let{pk}{\textsf{OTPWallet.construct}(r)}

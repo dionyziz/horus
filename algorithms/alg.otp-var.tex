@@ -4,9 +4,7 @@
   \begin{algorithmic}[1]
       \Contract{OTPWallet}
         \Let{\textsf{BLOCK\_DELAY}}{2k}
-        \Let{r}{\bot}
-        \Let{\textsf{spent}}{\emptyset}
-        \Let{\textsf{commitments}}{\emptyset}
+        \State{$r \gets \bot$; $\textsf{spent} \gets \emptyset$; $\textsf{commitments} \gets \emptyset$}
 
         \Function{\sf construct}{$\overline{r}$}
           \Let{r}{\overline{r}}

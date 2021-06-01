@@ -1,3 +1,16 @@
+\begin{figure*}[ht]
+    \caption{The sequence diagram of the OTP wallet. After initialization, the OTP device
+             becomes air gapped and the user submits the OTP visually to an online computer
+             at time $t$.}
+    \centering
+    \iflncs
+        \includegraphics[width=\textwidth,keepaspectratio]{figures/otp-sequence-diagram.pdf}
+    \else
+        \includegraphics[width=0.7 \textwidth,keepaspectratio]{figures/otp-sequence-diagram.pdf}
+    \fi
+    \label{fig.sequence-diagram}
+\end{figure*}
+
 \section{An OTP Wallet}
 
 The previous password-based construction has an important limitaton:
@@ -21,19 +34,6 @@ a large number of encrypted future OTPs and submits them to IPFS~\cite{ipfs} (or
 publicly for availability reasons (rightmost column). These data could also be submitted to the chain, if
 gas costs allow. Both $pk$ and all internal Merkle tree nodes are public. After this
 initial phase, the OTP device becomes air gapped.
-
-\begin{figure*}[ht]
-    \caption{The sequence diagram of the OTP wallet. After initialization, the OTP device
-             becomes air gapped and the user submits the OTP visually to an online computer
-             at time $t$.}
-    \centering
-    \iflncs
-        \includegraphics[width=\textwidth,keepaspectratio]{figures/otp-sequence-diagram.pdf}
-    \else
-        \includegraphics[width=0.7 \textwidth,keepaspectratio]{figures/otp-sequence-diagram.pdf}
-    \fi
-    \label{fig.sequence-diagram}
-\end{figure*}
 
 At any time Alice wishes to spend, she visually consults her OTP device which displays a time-based
 OTP key. Using a (newly booted) online computer, she creates a transaction $\textsf{tx}_\textsf{commit}$ in
@@ -65,19 +65,6 @@ Figure~\ref{fig.merkle-otp}
 using the collision-resistant hash function $H$ whose root is $r$. This $r$ is submitted
 to the constructor.
 
-\begin{figure}[H]
-    \caption{Each $\textsf{OTP}_t$ is timelocked with time $t$. All the timelock
-             ciphertexts $c_t$ are
-             then organized into a Merkle Tree whose root is $r$.}
-    \centering
-    \ifccs
-        \includegraphics[width=\columnwidth,keepaspectratio]{figures/timelock-merkle.pdf}
-    \else
-        \includegraphics[width=0.7 \columnwidth,keepaspectratio]{figures/timelock-merkle.pdf}
-    \fi
-    \label{fig.merkle-otp}
-\end{figure}
-
 When the time comes for Alice to spend her money, she calls the $\textsf{commit}$ method
 of the smart contract by issuing a $\textsf{tx}_\textsf{commit}$ transaction. This
 method takes parameters $z$ and $t$. Here, $z$ is the commitment
@@ -101,6 +88,19 @@ also be computed by anyone). The smart contract verifies that the provided
 data is included in previous commitments, that the Merkle tree proof is
 valid for the specified position, and that the timelock encryption of the
 provided OTP indeed corresponds to the given ciphertext.
+
+\begin{figure}[H]
+    \caption{Each $\textsf{OTP}_t$ is timelocked with time $t$. All the timelock
+             ciphertexts $c_t$ are
+             then organized into a Merkle Tree whose root is $r$.}
+    \centering
+    \ifccs
+        \includegraphics[width=\columnwidth,keepaspectratio]{figures/timelock-merkle.pdf}
+    \else
+        \includegraphics[width=0.7 \columnwidth,keepaspectratio]{figures/timelock-merkle.pdf}
+    \fi
+    \label{fig.merkle-otp}
+\end{figure}
 
 The honest party will always succeed in creating a valid spending transaction.
 To see this, note that the party begins creating the commit transaction at time
