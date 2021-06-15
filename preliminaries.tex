@@ -12,11 +12,11 @@ to include in the next block. Each block must satisfy the proof-of-work equation
 $H(B) \leq T$, where $T$ is the \emph{mining target}. In the \emph{static difficulty model}~\cite{backbone,backbone-new},
 $T$ is assumed to be a constant, but in the \emph{variable difficulty model}~\cite{varbackbone}, $T$ varies with
 time depending on how much mining power exists on the network. Our final construction will work
-in both models, as well as proof-of-stake, but for now let us assume that $T$ is a constant and
+in both models, as well as proof-of-stake; but, for now, let us assume that $T$ is a constant and
 that we are working in a proof-of-work setting.
 
 To address blocks within a chain $\chain$, we will use $\chain[i]$ to mean the $i^\text{th}$ (zero-based)
-block from the beginning, and $\chain[-i]$ to mean the $i^\text{th}$ (one-based) block from the end.
+block from the beginning and $\chain[-i]$ to mean the $i^\text{th}$ (one-based) block from the end.
 So $\chain[0]$ indicates the \emph{genesis} block, $\chain[-1]$ is the current tip.
 $|\chain|$ denotes the chain length. We use $\chain[i{:}j]$
 to denote the subchain starting at the $i^\text{th}$ block (inclusive) and ending at the $j^\text{th}$
@@ -27,7 +27,7 @@ Similarly, we use $\chain\{A{:}Z\}$ to denote the subchain starting at block $A$
 (inclusive) and ending at block $Z$ (exclusive), again allowing for omissions.
 
 In the decentralized setting, each of the honest parties maintaining the blockchain keeps a local
-chain $\chain$ which may be different from the others. It is known~\cite{backbone} that these chains
+chain $\chain$, which may be different from the others. It is known~\cite{backbone} that these chains
 cannot deviate much from each other. In particular, the \emph{Common Prefix} property mandates
 that they must all share a long common prefix and can only deviate with forks of length up
 to $k \in \mathbb{N}$, a constant determined by the security parameter of the execution.
