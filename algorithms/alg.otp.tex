@@ -4,7 +4,6 @@
   \begin{algorithmic}[1]
       \Contract{OTPWallet}
         \Let{\textsf{BLOCK\_DELAY}}{2k}
-        \Let{\textsf{HOURLY\_LIMIT}}{1 \textsf{ ether}}
         \Let{r}{\bot}
         \Let{\textsf{spent}}{\emptyset}
         \Let{\textsf{commitments}}{\emptyset}
@@ -20,7 +19,6 @@
                                c_t, w, t, \pi$}
           \Let{h}{H(\left<\textsf{OTP}, \textsf{salt}, \alpha_{\textsf{to}}, \textsf{amount}\right>)}
           \State{require($\textsf{commitments}[z][t]$)}
-          \State{require($\textsf{amount} \leq \textsf{HOURLY\_LIMIT}$)}
           \State{require($\lnot \textsf{spent}[t]$)}
           \State{require($\textsf{MT.Ver}(c_t, t, r, \pi)$)}
           \State{require($\textsf{WE.Dec}_\mathcal{R}(c_t, w) = \textsf{OTP}$)}

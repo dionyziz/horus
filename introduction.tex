@@ -12,26 +12,8 @@ brute force attack~\cite{brain-drain}.
 
 Perhaps unexpectedly, it \emph{is} possible to build brute force resilient wallets
 by leveraging the blockchain infrastructure itself.
-We build the first \emph{keyless cryptocurrency wallets}.
-We propose two constructions. Our first construction is a password-based wallet.
+We build the first \emph{keyless cryptocurrency wallet}.
 It operates as follows.
-Initially, Alice inputs a short (perhaps $6$ alphanumeric characters long) secret password into
-the newly installed wallet software, as well as a \emph{maturity date}. The wallet software creates
-a smart contract wallet containing the encrypted password on
-the blockchain and outputs a wallet address to which money can be deposited at any time.
-The money is unspendable prior to the maturity date.
-Now that the wallet has been funded, Alice decides to spend her money.
-At any time prior to the maturity date, Alice
-can open up a newly installed wallet instance and input the public wallet address and the
-secret password. The newly installed wallet does not hold any secret information such as
-private keys. Alice also enters the target address to which she wishes the money to go.
-The wallet broadcasts two transactions on the blockchain: a \emph{commit} transaction immediately,
-and a \emph{reveal} transaction later, on the maturity date. The money is securely transferred to
-the target address. The wallet becomes unusable after the maturity date. This construction
-is a stepping stone for the next.
-
-Our second and final construction, the \emph{Hours of Horus},
-is an OTP-based wallet. It operates as follows.
 Alice initially uses her mobile wallet to generate a high entropy OTP seed.
 This seed is used to generate
 a large amount of time-based OTPs (with, say, hourly resolution), which are encrypted
@@ -45,14 +27,13 @@ a time-based OTP. Without plugging in the offline device via USB or connecting i
 to the Internet, Alice visually copies the short (perhaps $6$ alphanumeric characters long)
 OTP that appears on the device's screen into her online computer. The wallet on
 her online computer can then be used to input a target address and amount to be transferred.
-Contrary to our previous construction, this second construction allows the user
-to spend money \emph{at any time} (for the price of maintaining
-the offline OTP device). As the OTPs are very short, this wallet is highly usable.
+This second construction allows the user
+to spend money \emph{at any time}. As the OTPs are very short, this wallet is highly usable.
 After the initial OTP seed generation, the seed is kept in an
 air gapped device, ensuring any bugs in the hardware or software cannot be abused
 to steal it.
 
-Critical to the security of both constructions is ensuring that no adversary can
+Critical to the security of the construction is ensuring that no adversary can
 brute force the short password or OTPs.
 Towards that goal, we devise a new cryptographic mechanism to secure cryptocurrency
 wallet passwords from offline brute forcing attempts. Any adversary who wishes
@@ -100,20 +81,19 @@ Until such constructions are built, our scheme is of theoretical interest.
 The contributions of this paper are summarized as follows:
 
 \begin{itemize}
-  \item We introduce a timelock-based \emph{keyless} cryptocurrency wallet in which funds are spent by
-        just using a short password at a prespecified \emph{maturity date}.
-  \item We introduce the first timelock-based, high usability \emph{OTP} wallet, with OTP length of
-        just 6 alphanumeric characters. The funds can be spent at any time just by
+  \item We introduce the first timelock-based \emph{OTP} wallet, with OTP length of
+        just 6 alphanumeric characters. The funds can be spent any time just by
         providing the OTP password from an air gapped device.
-  \item In the process of building these wallets, we put forth the first
+  \item We put forth the first
         \emph{decentralized rate limiting} scheme. The scheme protects the user
-        from brute force attacks by an adversary, by requiring all attempts to
+        from brute force attacks by an adversary by requiring all attempts to
         be recorded on the chain.
 \end{itemize}
 
 Secondary contributions include the first instantiation of timelock encryption applied
-to proof-of-stake blockchains and variable difficulty proof-of-work blockchains. Lastly,
-our security argument uses a hybrid approach which combines a high-entropy
+to proof-of-stake blockchains and variable difficulty proof-of-work blockchains, explored
+in the appendix. Lastly,
+our security argument, in the appendix, uses a hybrid approach which combines a high-entropy
 cryptographic parameter --- in which classical cryptographic security is ensured with overwhelming
 probability --- with a low-entropy cryptoeconomic parameter whose role is to ensure the
 attack is uneconomical for a rational adversary. This novel proof methodology may be of
@@ -121,37 +101,24 @@ independent interest in analyzing blockchain protocols, which often compose cryp
 and economics.
 
 Our security assumptions pertain to pseudorandomness, hash security, and lattice-based cryptography.
-Therefore our wallets are also quantum-resistant for the case of proof-of-work instantiation. For the
-case of proof-of-stake, if the underlying blockchain is quantum-resistant (by leveraging quantum-resistant
-signature schemes and VRFs), then so are our wallets.
+Therefore our wallets are also quantum-resistant.
 
 \noindent
 \textbf{Related work.}
-Witness Encryption was introduced by Garg et al.~\cite{STOC:GGSW13} (based on the \textsc{Exact
-Cover} problem). In that
-work, they propose a construction that makes use of lattice-based approximate multilinear
-maps proposed in previous work~\cite{EC:GarGenHal13}. The lattice-based approach has been
-improved~\cite{EC:LanSteSte14} and its implementation details further explored~\cite{AC:ACLL15}.
-A series of attacks on this construction have been discovered~\cite{EC:CHLRS15,EC:HuJia16,PKC:CLLT17,C:CGHLMM15,C:AlbBaiDuc16,EPRINT:CheJeoLee16}.
-A follow-up lattice-based approach~\cite{TCC:GenGorHal15} was put forth later, but also attacked~\cite{C:CLLT16}.
-An integer-based implementation of multilinear maps has also been proposed~\cite{C:CorLepTib13,C:CorLepTib15} and
+Witness Encryption was introduced by Garg et al.~\cite{STOC:GGSW13}
+using lattice-based approximate multilinear
+maps~\cite{EC:GarGenHal13}. It was lated
+improved theoretically~\cite{EC:LanSteSte14} and implementation-wise~\cite{AC:ACLL15},
+and attacked~\cite{EC:CHLRS15,EC:HuJia16,PKC:CLLT17,C:CGHLMM15,C:AlbBaiDuc16,EPRINT:CheJeoLee16}.
+A follow-up lattice-based approach~\cite{TCC:GenGorHal15} was also attacked~\cite{C:CLLT16}.
+Integer-based multilinear maps were proposed~\cite{C:CorLepTib13,C:CorLepTib15} and
 attacked~\cite{EC:CHLRS15,EPRINT:MinFou15,EPRINT:CheLeeRyu15}.
-Current advancements~\cite{ma2018mmap} seem, so far, immune to such attacks.
-All in all, the state of the art consists of constructions that have poorly
-understood security and sometimes exotic cryptographic assumptions.
-
-Timelock Encryption was introduced by Rivest et al.~\cite{timelock}. A Timelock Encryption
-making use of Witness Encryption (based on the \textsc{Subset Sum} problem) and blockchain proof-of-work was proposed by Liu et
-al.~\cite{timelock-bitcoin}. This is the first instance of timelock encryption in which
-a computationally limited decryptor can rely on the blockchain miners for the decryption
-of secrets. We make heavy use of their scheme in this work. Applications of this scheme to cryptocurrencies
-have been previously discussed by Miller~\cite{miller-timelock}.
-
-A taxonomy of cryptocurrency wallets and their security is put forth by Karantias~\cite{wallet-taxonomy}.
-The security of offline wallets is explored by Karakostas et al.~\cite{hardware-wallets}.
-The use of OTP~\cite{rfc6238,rfc4226} as a mechanism for cryptocurrency wallet protection has been explored in SmartOTP~\cite{smartotp}.
-The SmartOTP work was a great inspiration for the present paper. Contrary to our construction, their
-wallet uses OTPs as a second factor (in addition to private keys) and requires large-length OTP strings,
-which make it less usable, but their implementation is quite practical and even has a Solidity implementation.
-Password-based cryptocurrency wallets have previously appeared as \emph{brain wallets},
-but brute force attacks against them have proven catastrophic~\cite{brain-drain}.
+Current advancements~\cite{ma2018mmap} seem immune to such attacks.
+Timelock Encryption was introduced by Rivest et al.~\cite{timelock}.
+Using Witness Encryption and proof-of-work for timelocking was proposed by Liu et
+al.~\cite{timelock-bitcoin}. Cryptocurrency applications
+were discussed by Miller~\cite{miller-timelock}.
+An overview of wallets is given by Karantias~\cite{wallet-taxonomy}, and
+of hardware wallets by Karakostas et al.~\cite{hardware-wallets}.
+The use of OTP~\cite{rfc6238,rfc4226} for wallets was explored in SmartOTP~\cite{smartotp}.
+Password-based wallets appeared as \emph{brain wallets}~\cite{brain-drain}.

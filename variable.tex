@@ -1,10 +1,21 @@
 \section{Variable Difficulty Proof-of-Work}
 
-The proof-of-work OTP wallet just described is suitable for the
+In the variable difficulty model, the target $T$ is adjusted based on how the chain evolves.
+Concretely, the chain is split into \emph{epochs} of constant block length $m$ each. At the end of each
+epoch, the timestamp at the end of the chain is noted and the mining target is adjusted with the
+aim of keeping the expected block production rate constant.
+The
+way $T$ is adjusted is algorithmically determined, and it is important that it follows certain
+rules. While we will not articulate the exact rules, we remark that the new value $T'$ must fall
+within a range $\tau T, \frac{1}{\tau} T$, where $\tau \in (0, 1)$ (for example, Bitcoin sets
+$\tau = \frac{1}{4}$). This critical condition is necessary to avoid certain attacks~\cite{bahack}.
+
+The proof-of-work OTP wallet described in the main body is suitable for the
 \emph{static difficulty}
 model in which the mining target $T$ is not adjusted and remains constant.
 Real blockhchain systems adjust their $T$ parameter dynamically in every
-epoch, as discussed in the Preliminaries section.
+epoch~\cite{varbackbone}. Our construction in
+this section will work in both models.
 
 The construction for the dynamic difficulty proof-of-work model is similar
 to the static difficulty proof-of-work construction, with a key difference
@@ -98,6 +109,12 @@ if all the difficulty from genesis to the current block is summed up.
 Additionally, the $2k$ factor must be weighted by the current difficulty
 $\frac{1}{\textsf{block.T}}$, where $\textsf{block.T}$ indicates the
 mining target of the current block.
+
+The algorithms for the variable difficulty OTP wallet
+appear in Algorithm~\ref{alg.otp-var} and \ref{alg.otp.external-var}.
+
+\import{./}{algorithms/alg.otp-var}
+\import{./}{algorithms/alg.otp.external-var}
 
 The argument for the correctness of the scheme and the security of the scheme
 remains the same. Some remarks about the security portion are in order. First,

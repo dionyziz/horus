@@ -1,6 +1,36 @@
 \section{Proof-of-Stake}
 
-We now adapt our OTP wallet construction to the proof-of-stake setting (the password wallet can also
+Contrary to proof-of-work blockchains, a proof-of-stake chain progresses in \emph{slots}
+(prefixed time durations) during which
+parties can create blocks or remain silent.
+As in proof-of-work, each block header $B_i$ consists of $\left<\textsf{tx}_i, s_i\right>$, but now
+does not include a $\textsf{ctr}_i$.
+The blocks created at each slot are accompanied by a
+signature $\sigma_i$ created by a designated leader for the slot.
+A proof $\pi_i$ illustrating the designated leader is the rightful one
+is also broadcast together with the block.
+The probability that a party becomes a leader at a given slot is roughly
+proportional to the stake they hold within the system.
+These proofs of leadership are different depending on the system and can
+be the random outcome of a multiparty computation, as in the \emph{Ouroboros}~\cite{ouroboros} system,
+or a verifiable random function~\cite{FOCS:MicRabVad99} evaluated on this randomness, as in
+the \emph{Ouroboros Praos}~\cite{praos} construction.
+In the first system,
+each slot is allocated to precisely one party, and the production of no blocks, or two competing blocks in the
+same slot, indicates adversarial behavior. In the second system, it is possible that a slot is allocated
+to multiple honest parties, or no parties at all. These details do not affect our scheme, as long as the following
+property is maintained: For any $2k$ consecutive slots, at least $k+1$ slots are allocated to an honest
+party. Additionally, we will assume that the common prefix property holds here, too.
+
+As in proof-of-work, the chain is split into epochs.
+At the end of each epoch, a multiparty computation is performed to determine
+the randomness value for the next epoch based on the stake distribution during the current epoch.
+Different systems use different MPCs. Our only requirement is that these MPCs provide some
+evidence $u_e$ that the randomness for epoch $e$ is $\rho_e$. This evidence must be
+polynomially checkable in retrospect. This requirement is satisfied in proof-of-stake blockchains,
+as it is this evidence that allows new nodes to bootstrap correctly~\cite{ouroboros-genesis}.
+
+In this section, we adapt our OTP wallet construction to the proof-of-stake setting (the password wallet can also
 be adapted likewise). For concreteness, we describe
 a construction for the \emph{Ouroboros}~\cite{ouroboros} and \emph{Ouroboros Praos}~\cite{praos}
 systems, but our results are extensible to other systems as well (such as Snow

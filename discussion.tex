@@ -1,8 +1,55 @@
 \section{Discussion}
 
-Having completed the presentation of our schemes, we now discuss a couple of
-shortcomings and advantages of our scheme that differentiate it from previously
-known solutions.
+Having completed the presentation of our schemes in both static and variable proof-of-work,
+as well as in proof-of-stake, we now discuss a couple of
+remarks (and shortcomings) of our scheme.
+
+\noindent
+\textbf{Large witnesses.}
+The witnesses to the problem instances of the moderately hard \textsc{NP} language describing
+chain creation can grow linearly together with the chain. To reduce witness
+size, a (zero knowledge) proof of knowledge such as a zk-SNARK~\cite{EPRINT:BCTV13} can be used.
+In this case, instead of
+witness encrypting against a decryptor who
+``knows a witness consisting of a list of chain headers that satisfy the blockchain properties,''
+one can instead witness encrypt against a decryptor who
+``knows a witness consisting of a zero-knowledge proof of knowledge attesting to the knowledge of chain headers
+that satisfy the blockchain properties.'' This composition of witness encryption and zero-knowledge proofs
+allows the witnesses presented to the blockchain to become constant size. For further details,
+refer to \cite{timelock-bitcoin}.
+
+\noindent
+\textbf{Using standard time-based OTP.}
+A standard time-based OTP cannot be used by the user of our protocol, because the
+chain, as a stochastic process, may have grown faster or slower than expected. The
+OTP device must know the current height of the blockchain to be able to reveal the
+correctly indexed OTP (which will reside at OTP index $|\chain| + \ell + 2k$).
+One practical way to achieve this is to have the mobile
+wallet (or a block explorer) display the current block height, which can then be
+inputted by the user to the OTP application.
+
+\noindent
+\textbf{Security of the online computer.}
+One critical point of infrastructure is the online
+computer to which the user inputs their OTP code. If that computer becomes
+compromised, it can change the target address and amount that the user is
+inputting and deplete the wallet. One practical mechanism to cut the user's losses
+is to establish an hourly limit in the amount that can be spent by the wallet.
+The simplest way is to add an assertion in Algorithm~\ref{alg.otp} that ensures
+the amount spent in every \emph{reveal} call is limited. In
+such a case, the compromised computer can only steal the user's funds \emph{once},
+and up to the specified hourly limit, before being detected.
+More complex schemes can introduce limits for various periods of time,
+and the contract would have to keep track of how much money has been spent
+in every period of time.
+
+\noindent
+\textbf{Two-factor wallets.}
+The OTP scheme can be used either as a single-factor (as described in the main body)
+or as a second factor combined
+with a private key if desired. It is an effective second factor because,
+if either, but not both, of the private key or the OTP device become compromised,
+the wallet remains secure.
 
 \noindent
 \textbf{A bounty for the miners.}
